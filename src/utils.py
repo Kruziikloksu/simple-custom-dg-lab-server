@@ -2,10 +2,12 @@ import math
 import qrcode
 from qrcode.image.pil import PilImage
 from typing import List, Optional
+import qrcode_terminal
 from pulse_section import PulseSection
 from enums import MessageType, ChannelType, StrengthChangeMode
 from functools import lru_cache
 from models import DungeonLabMessage
+
 
 def get_strength_str(channel: ChannelType, mode: StrengthChangeMode, value: int) -> str:
     return f"strength-{channel.value}+{mode.value}+{value}"
@@ -44,7 +46,7 @@ def get_dg_message_json(type: MessageType, client_id: str, target_id: str, messa
 
 
 def show_qr_code(qr_code_str: str):
-    # qrcode_terminal.draw(qr_code_str)
+    qrcode_terminal.draw(qr_code_str)
     qr_code_img = qrcode.make(qr_code_str, image_factory=PilImage)
     qr_code_img.show()
 

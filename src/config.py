@@ -39,11 +39,19 @@ def load_toml_config():
         return tomllib.load(f)
 
 
+def get_local_ip():
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+            s.connect(('8.8.8.8', 80))
+            return s.getsockname()[0]
+    except Exception:
+        return socket.gethostbyname(socket.gethostname())
+
 ensure_config()
 toml_config = load_toml_config().get("Misc", {})
 RUN_TEMP_CLIENT = toml_config.get("RUN_TEMP_CLIENT", True)
 WS_SERVER_HOST = "0.0.0.0"
-WS_CLIENT_HOST = socket.gethostbyname(socket.gethostname())
+WS_CLIENT_HOST = get_local_ip() #socket.gethostbyname(socket.gethostname())
 WS_SERVER_PORT = toml_config.get("PORT", 4503)
 HEARTBEAT_INTERVAL = toml_config.get("HEARTBEAT_INTERVAL", 30)
 LOG_LEVEL = logging.DEBUG
