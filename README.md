@@ -4,7 +4,7 @@
 
 一个基于[FastAPI](https://github.com/fastapi/fastapi)和[Uvicorn](https://github.com/encode/uvicorn)构建的简易[DG-LAB](https://github.com/DG-LAB-OPENSOURCE/DG-LAB-OPENSOURCE)消息转发服务，支持郊狼V3。
 
-主要为方便个人游戏开发和制作Mod自用，尽可能简易~~简陋~~，预期仅支持Windows系统下使用，附简单的Unity客户端脚本示例。
+主要为方便个人游戏开发和制作Mod自用，尽可能简易~~简陋~~，预期仅支持Windows和Linux系统下使用，附简单的Unity客户端脚本示例。
 
 内置一个临时客户端通过WebSocket绑定DG-LAB APP，支持通过Http Post通知APP。同时支持第三方客户端连接WebSocket并与APP绑定进行通信。此处仅设计支持每组设备一一绑定，如有额外需求可自行编写代码实现。
 
