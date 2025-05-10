@@ -176,3 +176,6 @@ cython_debug/
 # VS Code settings
 .vscode/
 src/tempCodeRunnerFile.py
+
+# Release files
+release/

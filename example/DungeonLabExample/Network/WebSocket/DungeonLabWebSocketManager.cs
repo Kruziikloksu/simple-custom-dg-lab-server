@@ -1,4 +1,4 @@
-﻿//using Sirenix.OdinInspector;
+﻿using Sirenix.OdinInspector;
 using System;
 using System.Net.WebSockets;
 using UnityEngine;
@@ -49,7 +49,7 @@ namespace CustomDungeonLab
         }
 
         #region Connect
-        //[Button("Connect")]
+        [Button("Connect")]
         public void Connect(string host = null)
         {
             if (string.IsNullOrEmpty(host))
@@ -60,7 +60,7 @@ namespace CustomDungeonLab
             client?.Connect(uri);
         }
 
-        //[Button("Close")]
+        [Button("Close")]
         public void Close()
         {
             client?.Close();
@@ -202,7 +202,7 @@ namespace CustomDungeonLab
             client?.Send(message);
         }
 
-        //[Button("SendAllPresetPulseData")]
+        [Button("SendAllPresetPulseData")]
         public void SendAllDungeonLabPresetPulseMessage(DungeonLabChannel channel)
         {
             var presetWaveDataDict = DungeonLabUtility.PresetPulseDataDict;
@@ -212,32 +212,32 @@ namespace CustomDungeonLab
             }
         }
 
-        //[Button("SendDungeonLabPresetPulseMessage")]
+        [Button("SendDungeonLabPresetPulseMessage")]
         public void SendDungeonLabPresetPulseMessage(DungeonLabChannel channel, string presetKey)
         {
             var preset = DungeonLabUtility.GetPresetWaveData(presetKey);
             SendDungeonLabMessage(DungeonLabMessageType.CUSTOM, $"preset-{channel}:{preset}");
         }
 
-        //[Button("SendDungeonLabPulseMessage")]
+        [Button("SendDungeonLabPulseMessage")]
         public void SendDungeonLabPulseMessage(DungeonLabChannel channel, string pulseStr)
         {
             SendDungeonLabMessage(DungeonLabMessageType.MSG, $"pulse-{channel}:{pulseStr}");
         }
 
-        //[Button("SendDungeonLabClearMessage")]
+        [Button("SendDungeonLabClearMessage")]
         public void SendDungeonLabClearMessage(DungeonLabChannel channel)
         {
             SendDungeonLabMessage(DungeonLabMessageType.MSG, $"clear-{(int)channel}");
         }
 
-        //[Button("SendDungeonLabStrengthMessage")]
+        [Button("SendDungeonLabStrengthMessage")]
         public void SendDungeonLabStrengthMessage(DungeonLabChannel channel, DungeonLabStrengthChangeMode mode, int value)
         {
             SendDungeonLabMessage(DungeonLabMessageType.MSG, $"strength-{(int)channel}+{(int)mode}+{value}");
         }
 
-        //[Button("SendDungeonLabMessage")]
+        [Button("SendDungeonLabMessage")]
         public void SendDungeonLabMessage(DungeonLabMessageType messageType, string message)
         {
             var messageData = new DungeonLabMessage
