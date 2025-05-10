@@ -4,7 +4,7 @@
 
 一个基于[FastAPI](https://github.com/fastapi/fastapi)和[Uvicorn](https://github.com/encode/uvicorn)构建的简易[DG-LAB](https://github.com/DG-LAB-OPENSOURCE/DG-LAB-OPENSOURCE)消息转发服务，支持郊狼V3。
 
-主要为方便个人游戏开发和制作Mod自用，尽可能简易~~简陋~~，预期仅支持Windows和Linux系统下使用，附简单的Unity客户端脚本示例。
+主要为方便个人游戏开发和制作Mod自用，尽可能简易~~简陋~~，暂预期仅支持Windows和Linux系统下使用，附简单的Unity客户端脚本示例。
 
 内置一个临时客户端通过WebSocket绑定DG-LAB APP，支持通过Http Post通知APP。同时支持第三方客户端连接WebSocket并与APP绑定进行通信。此处仅设计支持每组设备一一绑定，如有额外需求可自行编写代码实现。
 
@@ -27,11 +27,11 @@
 2. 确保已安装Python，版本需求Python >= 3.11
 3. 创建虚拟环境， 执行 `pip install -r requirements.txt` 安装依赖
 
-2、运行simple-custom-dg-lab-server.exe，如果是自行部署则运行 `src/main.py`。此时将在exe文件同级目录或工程 src 目录下生成配置文件 `config.toml`，内为杂项配置，一般不需要修改。
+2、解压后运行simple-custom-dg-lab-server.exe或simple-custom-dg-lab-server，如果是自行部署则使用你的Python解释器运行 `src/main.py`。此时将在exe文件同级目录或工程 src 目录下生成配置文件 `config.toml`，内为杂项配置，一般不需要修改。
 
 **如未修改过 `config.toml`，将默认在本地 `0.0.0.0:4503`启动用作消息转发的服务，同时运行内置客户端进程连接 WebSocket 并弹出二维码图片。如此处希望不希望启动内置客户端进程，可在 `config.toml`修改 `RUN_TEMP_CLIENT`值为 false后重新运行。**
 
-**默认所有非DG-LAB APP （下称APP）的客户端连接时自动弹出二维码图片用于APP绑定，扫码时请保证启动APP的手机与本机处于统一网络环境下。此二维码图片如有需要请自行留存或在客户端自行生成，规则见[官方文档](https://github.com/DG-LAB-OPENSOURCE/DG-LAB-OPENSOURCE/blob/main/socket/README.md)，客户端断开连接后即失效。**
+**默认所有非DG-LAB APP （下称APP）的客户端连接时自动弹出二维码图片并在终端输出用于APP绑定，扫码时请保证启动APP的手机与本机处于统一网络环境下。此二维码如有需要请自行留存或在客户端自行生成，规则见[官方文档](https://github.com/DG-LAB-OPENSOURCE/DG-LAB-OPENSOURCE/blob/main/socket/README.md)，客户端断开连接后即失效。**
 
 下方介绍使用Http Post请求和WebSocket连接两种方式控制APP，请按需实现自己的客户端。WebSocket客户端实现逻辑可参考本仓库的 `src/client.py`。此处也提供在Unity实现的两种客户端示例，可在Release下载.unitypackage文件导入工程或查阅本仓库的example目录。如果你使用[BepInEx](https://github.com/BepInEx/BepInEx)等框架编写插件，可以参考 `example\DungeonLabExample\Network\Http\DungeonLabHttpManager.cs`的实现逻辑~~或者不嫌代码丑也可以复制去用~~。具体的波形发送规则，如一定时间内按间隔持续发送指定波形、随机波形等，就由用户在自己的客户端自行按需定制了~~比如敌方每动一下就发一次波形的沉浸式体验什么的~~。
 
