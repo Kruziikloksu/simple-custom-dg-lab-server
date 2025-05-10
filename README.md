@@ -2,7 +2,7 @@
 
 ## 🐺简述
 
-一个基于[FastAPI](https://github.com/fastapi/fastapi)和[Uvicorn](https://github.com/encode/uvicorn)构建的简易[DG-LAB](https://github.com/DG-LAB-OPENSOURCE/DG-LAB-OPENSOURCE)消息转发服务。
+一个基于[FastAPI](https://github.com/fastapi/fastapi)和[Uvicorn](https://github.com/encode/uvicorn)构建的简易[DG-LAB](https://github.com/DG-LAB-OPENSOURCE/DG-LAB-OPENSOURCE)消息转发服务，支持郊狼V3。
 
 主要为方便个人游戏开发和制作Mod自用，尽可能简易~~简陋~~，预期仅支持Windows系统下使用，附简单的Unity客户端脚本示例。
 
@@ -178,4 +178,4 @@ DG-APP推出了波形文件导出的功能，因此我们可以比较方便地�
 
 ## 结语
 
-Awoo！
+嗷呜！
