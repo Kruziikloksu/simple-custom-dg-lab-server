@@ -4,7 +4,7 @@
 
 一个基于[FastAPI](https://github.com/fastapi/fastapi)和[Uvicorn](https://github.com/encode/uvicorn)构建的简易[DG-LAB](https://github.com/DG-LAB-OPENSOURCE/DG-LAB-OPENSOURCE)消息转发服务。
 
-主要为方便个人游戏开发和制作Mod自用，尽可能简易~~简陋~~，预期仅支持Windows系统下使用，内含简单的Unity客户端脚本示例。
+主要为方便个人游戏开发和制作Mod自用，尽可能简易~~简陋~~，预期仅支持Windows系统下使用，附简单的Unity客户端脚本示例。
 
 内置一个临时客户端通过WebSocket绑定DG-LAB APP，支持通过Http Post通知APP。同时支持第三方客户端连接WebSocket并与APP绑定进行通信。此处仅设计支持每组设备一一绑定，如有额外需求可自行编写代码实现。
 
@@ -12,9 +12,10 @@
 
 - 通道波形发送（DG-LAB 官方波形数据格式）
 - DG-LAB APP导出波形字符串发送（导出波形字符串解析）
+- 通道波形清空
 - 通道强度修改
-- Http Post请求控制APP
-- WebSocket连接控制APP
+- Http Post请求控制DG-LAB APP
+- WebSocket连接控制DG-LAB APP
 
 ## 📕快速上手
 
@@ -174,3 +175,7 @@ DG-APP推出了波形文件导出的功能，因此我们可以比较方便地�
 **以上的所有值，注意是滑条值的部分，它们不是真实数据，而是APP内滑动条的值，而这些条在不同区间的步长是不一样的，需要自行对照换算才能得到实际值。**
 
 很明显，有了这些信息，我们可以使用这份字符串构建APP收信协议的脉冲数据，插入脉冲数据的数量可以根据小节时长、播放速率、休息时长（这个有点问题，APP的显示也疑似有Bug，可以忽略不计）算出，频率则可以根据频率的起始值和终点值按照渐变类型插值算出。这样就可以基本模拟出APP导出波形的效果了。此处可参考 `src/utils.py`和 `src/pulse_section.py`，里面是我快速处理的简易解析和转换~~超长临时~~代码。
+
+## 结语
+
+Awoo！
