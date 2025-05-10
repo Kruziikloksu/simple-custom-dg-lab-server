@@ -1,4 +1,4 @@
-using Sirenix.OdinInspector;
+// using Sirenix.OdinInspector;
 using System.Net.Http;
 using UnityEngine;
 namespace CustomDungeonLab
@@ -33,7 +33,7 @@ namespace CustomDungeonLab
             }
         }
 
-        [Button("SendAllDungeonLabPresetPulseMessage")]
+        // [Button("SendAllDungeonLabPresetPulseMessage")]
         public void SendAllDungeonLabPresetPulseMessage(DungeonLabChannel channel)
         {
             var presetWaveDataDict = DungeonLabUtility.PresetPulseDataDict;
@@ -43,7 +43,7 @@ namespace CustomDungeonLab
             }
         }
 
-        [Button("SendDungeonLabPresetPulseMessage")]
+        // [Button("SendDungeonLabPresetPulseMessage")]
         public void SendDungeonLabPresetPulseMessage(DungeonLabChannel channel, string presetKey)
         {
             var preset = DungeonLabUtility.GetPresetWaveData(presetKey);
@@ -56,7 +56,7 @@ namespace CustomDungeonLab
             HttpPost(message, HttpPath.DUNGEON_LAB_PRESET_PULSE_MESSAGE);
         }
 
-        [Button("SendDungeonLabPulseMessage")]
+        // [Button("SendDungeonLabPulseMessage")]
         public void SendDungeonLabPulseMessage(DungeonLabChannel channel, string pulseStr)
         {
             var messageData = new DungeonLabPulseMessage
@@ -68,7 +68,7 @@ namespace CustomDungeonLab
             HttpPost(message, HttpPath.DUNGEON_LAB_PULSE_MESSAGE);
         }
 
-        [Button("SendDungeonLabClearMessage")]
+        // [Button("SendDungeonLabClearMessage")]
         public void SendDungeonLabClearMessage(DungeonLabChannel channel)
         {
             var messageData = new DungeonLabClearMessage
@@ -79,7 +79,7 @@ namespace CustomDungeonLab
             HttpPost(message, HttpPath.DUNGEON_LAB_CLEAR_MESSAGE);
         }
 
-        [Button("SendDungeonLabStrengthMessage")]
+        // [Button("SendDungeonLabStrengthMessage")]
         public void SendDungeonLabStrengthMessage(DungeonLabChannel channel, DungeonLabStrengthChangeMode mode, int value)
         {
             var messageData = new DungeonLabStrengthMessage
@@ -92,7 +92,7 @@ namespace CustomDungeonLab
             HttpPost(message, HttpPath.DUNGEON_LAB_STRENGTH_MESSAGE);
         }
 
-        [Button("SendDungeonLabMessage")]
+        // [Button("SendDungeonLabMessage")]
         public void SendDungeonLabMessage(DungeonLabMessageType messageType, string message)
         {
             var messageData = new SimpleDungeonLabMessage
