@@ -1,8 +1,8 @@
-# simple-custom-dg-lab-server `<br>`简易的DG-LAB消息转发服务
+# simple-custom-dg-lab-server
 
 ## 简述
 
-一个基于[FastAPI](https://fastapi.tiangolo.com/)和[Uvicorn](https://www.uvicorn.org/)构建的简易的[DG-LAB](https://github.com/DG-LAB-OPENSOURCE/DG-LAB-OPENSOURCE)消息转发服务。
+一个基于[FastAPI](https://fastapi.tiangolo.com/)和[Uvicorn](https://www.uvicorn.org/)构建的简易[DG-LAB](https://github.com/DG-LAB-OPENSOURCE/DG-LAB-OPENSOURCE)消息转发服务。
 
 主要为方便个人制作游戏Mod娱乐自用，尽可能简易~~简陋~~，预期仅支持Windows系统下使用，内含简单的Unity客户端脚本示例。
 
@@ -10,11 +10,11 @@
 
 ## 功能支持
 
-- [X] 通道波形发送（DG-LAB 官方波形数据格式）
-- [X] DG-LAB APP导出波形字符串发送（导出波形字符串解析）
-- [X] 通道强度修改
-- [X] Http Post请求控制APP
-- [X] WebSocket连接控制APP
+-  通道波形发送（DG-LAB 官方波形数据格式）
+-  DG-LAB APP导出波形字符串发送（导出波形字符串解析）
+-  通道强度修改
+-  Http Post请求控制APP
+-  WebSocket连接控制APP
 
 ## 快速上手
 
