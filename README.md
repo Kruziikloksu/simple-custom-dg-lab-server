@@ -27,7 +27,7 @@
 2. 确保已安装Python，版本需求Python >= 3.11
 3. 创建虚拟环境， 执行 `pip install -r requirements.txt` 安装依赖
 
-2、解压后运行simple-custom-dg-lab-server.exe或simple-custom-dg-lab-server，如果是自行部署则使用你的Python解释器运行 `src/main.py`。此时将在exe文件同级目录或工程 src 目录下生成配置文件 `config.toml`，内为杂项配置，一般不需要修改。
+2、解压后运行simple-custom-dg-lab-server.exe或simple-custom-dg-lab-server，如果是自行部署则使用你的Python解释器运行 `src/main.py`。此时将在可执行文件同级目录或工程 src 目录下生成配置文件 `config.toml`，内为杂项配置，一般不需要修改。
 
 **如未修改过 `config.toml`，将默认在本地 `0.0.0.0:4503`启动用作消息转发的服务，同时运行内置客户端进程连接 WebSocket 并弹出二维码图片。如此处希望不希望启动内置客户端进程，可在 `config.toml`修改 `RUN_TEMP_CLIENT`值为 false后重新运行。**
 
