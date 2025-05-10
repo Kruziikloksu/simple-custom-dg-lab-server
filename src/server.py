@@ -1,12 +1,14 @@
 import asyncio
 import multiprocessing
+import re
 import config
 import utils
 import enums
 import custom_logger
 import uuid
 import json
-from utils import DungeonLabMessage
+from utils import DungeonLabMessage, DungeonLabSimpleMessage, DungeonLabStrengthMessage, DungeonLabClearMessage, DungeonLabPulseMessage, DungeonLabPresetPulseMessage
+from enums import MessageType, ChannelType
 from uvicorn import Config, Server
 from typing import Optional
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
@@ -108,7 +110,7 @@ def bind_client(client_id: str, target_id: str):
 async def on_client_connected(websocket: WebSocket, full_path: str):
     uid = add_client(websocket)
     custom_logger.info(f"【Server】 Client {uid} connected to {full_path}")
-    await send_dg_message(websocket, enums.MessageType.BIND.value, uid, "", "targetId")
+    await send_dg_message(websocket, enums.MessageType.BIND, uid, "", "targetId")
     if not full_path.strip():
         qr_code_str = utils.get_qr_code_str(config.WS_CLIENT_HOST, config.WS_SERVER_PORT, uid)
         custom_logger.debug(f"【Server】 QR code string: {qr_code_str}")
@@ -123,89 +125,140 @@ async def on_client_disconnected(websocket):
             target_id = get_target_id_by_client_id(uid)
             if target_id is not None:
                 target_websocket = get_client_websocket(target_id)
-                await send_dg_message(target_websocket, enums.MessageType.BREAK.value, uid, target_id, enums.StatusCode.CLIENT_DISCONNECTED.value)
+                await send_dg_message(target_websocket, enums.MessageType.BREAK, uid, target_id, enums.StatusCode.CLIENT_DISCONNECTED.value)
         if uid in relationship_dict.values():
             client_id = get_client_id_by_target_id(uid)
             if client_id is not None:
                 client_websocket = get_client_websocket(client_id)
-                await send_dg_message(client_websocket, enums.MessageType.BREAK.value, client_id, uid, enums.StatusCode.CLIENT_DISCONNECTED.value)
+                await send_dg_message(client_websocket, enums.MessageType.BREAK, client_id, uid, enums.StatusCode.CLIENT_DISCONNECTED.value)
     remove_client(websocket)
 # endregion
 
 
 # region Handlers
 async def on_receive_message(websocket, response):
-    uid = get_client_uid(websocket)
     try:
-        custom_logger.debug(f"【Server】 Receive client {uid} message: {response}")
-        data = DungeonLabMessage.model_validate_json(json_data=response)
-
-    except json.JSONDecodeError:
-        await send_dg_message(websocket, enums.MessageType.MSG.value, "", "", enums.StatusCode.INVALID_JSON_FORMAT.value)
-    if data:
-        type = data.type
-        message = data.message
-        client_id = data.clientId
-        target_id = data.targetId
-        if type == enums.MessageType.BIND.value:
-            await on_receive_bind_type_message(websocket, client_id, target_id, message)
-        elif type == enums.MessageType.MSG.value:
-            pass
-        elif type == enums.MessageType.HEARTBEAT.value:
-            pass
-        elif type == enums.MessageType.BREAK.value:
-            pass
-        elif type == enums.MessageType.ERROR.value:
-            custom_logger.error(f"【Server】 Client {uid} error: {message}")
-        if uid is not None:
-            if uid in relationship_dict.keys():
-                target_id = get_target_id_by_client_id(uid)
-                if target_id is not None:
-                    target_websocket = get_client_websocket(target_id)
-                    await send_dg_message(target_websocket, type, uid, target_id, message)
-            if uid in relationship_dict.values():
-                client_id = get_client_id_by_target_id(uid)
-                if client_id is not None:
-                    client_websocket = get_client_websocket(client_id)
-                    await send_dg_message(client_websocket, type, client_id, uid, message)
+        uid = get_client_uid(websocket)
+        try:
+            custom_logger.debug(f"【Server】 Receive client {uid} message: {response}")
+            data = DungeonLabMessage.model_validate_json(json_data=response)
+        except json.JSONDecodeError:
+            await send_dg_message(websocket, enums.MessageType.MSG, "", "", enums.StatusCode.INVALID_JSON_FORMAT.value)
+        if data:
+            type = data.type
+            message = data.message
+            client_id = data.clientId
+            target_id = data.targetId
+            if type == enums.MessageType.BIND:
+                await on_receive_bind_type_message(websocket, client_id, target_id, message)
+            elif type == enums.MessageType.MSG:
+                pass
+            elif type == enums.MessageType.HEARTBEAT:
+                pass
+            elif type == enums.MessageType.BREAK:
+                pass
+            elif type == enums.MessageType.ERROR:
+                custom_logger.error(f"【Server】 Client {uid} error: {message}")
+            elif type == enums.MessageType.CUSTOM:
+                await on_receive_custom_message(websocket, client_id, target_id, message)
+            if type != enums.MessageType.CUSTOM and uid is not None:
+                if uid in relationship_dict.keys():
+                    target_id = get_target_id_by_client_id(uid)
+                    if target_id is not None:
+                        target_websocket = get_client_websocket(target_id)
+                        await send_dg_message(target_websocket, type, uid, target_id, message)
+                if uid in relationship_dict.values():
+                    client_id = get_client_id_by_target_id(uid)
+                    if client_id is not None:
+                        client_websocket = get_client_websocket(client_id)
+                        await send_dg_message(client_websocket, type, client_id, uid, message)
+    except Exception as e:
+        custom_logger.error(f"【Server】 Error processing message: {e}")
 
 
 async def on_receive_bind_type_message(websocket, client_id, target_id, message):
     is_client_id_exist = client_id in client_dict.keys()
     is_target_id_exist = target_id in client_dict.keys()
     if not is_client_id_exist or not is_target_id_exist:
-        await send_dg_message(websocket, enums.MessageType.BIND.value, client_id, target_id, enums.StatusCode.TARGET_CLIENT_NOT_FOUND.value)
+        await send_dg_message(websocket, enums.MessageType.BIND, client_id, target_id, enums.StatusCode.TARGET_CLIENT_NOT_FOUND.value)
     is_client_id_bind = client_id in relationship_dict.keys() or client_id in relationship_dict.values()
     is_target_id_bind = target_id in relationship_dict.keys() or target_id in relationship_dict.values()
     if is_client_id_bind or is_target_id_bind:
-        await send_dg_message(websocket, enums.MessageType.MSG.value, client_id, target_id, enums.StatusCode.ID_ALREADY_BOUND.value)
+        await send_dg_message(websocket, enums.MessageType.MSG, client_id, target_id, enums.StatusCode.ID_ALREADY_BOUND.value)
     else:
         bind_client(client_id, target_id)
-        await send_dg_message(websocket, enums.MessageType.BIND.value, client_id, target_id, enums.StatusCode.SUCCESS.value)
+        await send_dg_message(websocket, enums.MessageType.BIND, client_id, target_id, enums.StatusCode.SUCCESS.value)
+
+
+async def on_receive_custom_message(websocket, client_id: str, target_id: str, message: str):
+    if message.startswith("preset-"):
+        match = re.match(r"preset-([A-Za-z]+):(.*)", message)
+        if match:
+            channel_str = match.group(1)
+            channel = ChannelType[channel_str]
+            preset = match.group(2)
+            preset_pulse_section_list = utils.get_preset_pulse_section_str_list(preset)
+            target_websocket = get_client_websocket(target_id)
+            for section in preset_pulse_section_list:
+                pulse_str = utils.get_pulse_str(channel, section)
+                await send_dg_message(target_websocket, enums.MessageType.MSG, client_id, target_id, pulse_str)
 
 
 @app.post("/dungeon_lab_message")
-async def on_post_dungeon_lab_message(dungeon_lab_message: DungeonLabMessage):
-    custom_logger.debug(f"【Server】 Broadcast message to DG-LAB: {dungeon_lab_message}")
-    for client_id, target_id in relationship_dict.items():
-        ws = get_client_websocket(target_id)
-        await send_dg_message(ws, dungeon_lab_message.type, client_id, target_id, dungeon_lab_message.message)
+async def on_post_dungeon_lab_message(dungeon_lab_message: DungeonLabSimpleMessage):
+    await send_dg_message_to_all_target(dungeon_lab_message.type, dungeon_lab_message.message)
+
+
+@app.post("/dungeon_lab_strength_message")
+async def on_post_dungeon_lab_strength_message(pulse_message: DungeonLabStrengthMessage):
+    strength_str = utils.get_strength_str(pulse_message.channel, pulse_message.mode, pulse_message.value)
+    await send_dg_message_to_all_target(MessageType.MSG, strength_str)
+
+
+@app.post("/dungeon_lab_clear_message")
+async def on_post_dungeon_lab_clear_message(pulse_message: DungeonLabClearMessage):
+    clear_str = utils.get_clear_str(pulse_message.channel)
+    await send_dg_message_to_all_target(MessageType.MSG, clear_str)
+
+
+@app.post("/dungeon_lab_pulse_message")
+async def on_post_dungeon_lab_pulse_message(pulse_message: DungeonLabPulseMessage):
+    pulse_str = utils.get_pulse_str(pulse_message.channel, pulse_message.pulse)
+    await send_dg_message_to_all_target(MessageType.MSG, pulse_str)
+
+
+@app.post("/dungeon_lab_preset_pulse_message")
+async def on_post_dungeon_lab_preset_pulse_message(pulse_message: DungeonLabPresetPulseMessage):
+    section_pulse_list = utils.get_preset_pulse_section_str_list(pulse_message.preset)
+    for section_pulse in section_pulse_list:
+        pulse_str = utils.get_pulse_str(pulse_message.channel, section_pulse)
+        await send_dg_message_to_all_target(MessageType.MSG, pulse_str)
 # endregion
 
 
 # region Send
+async def send_dg_message_to_all_target(type: MessageType, message: str):
+    try:
+        custom_logger.debug(f"【Server】 Broadcast message to DG-LAB: {{type:{type.value},message:{message},...}}")
+        for client_id, target_id in relationship_dict.items():
+            ws = get_client_websocket(target_id)
+            await send_dg_message(ws, type, client_id, target_id, message)
+    except Exception as e:
+        custom_logger.error(f"【Server】 Error broadcasting message to DG-LAB: {e}")
+
+
 async def send_heartbeat(websocket: WebSocket):
     while True:
         await asyncio.sleep(config.HEARTBEAT_INTERVAL)
         try:
             uid = get_client_uid(websocket)
             if uid:
-                await send_dg_message(websocket, enums.MessageType.HEARTBEAT.value, uid, "", enums.StatusCode.SUCCESS.value)
+                await send_dg_message(websocket, MessageType.HEARTBEAT, uid, "", enums.StatusCode.SUCCESS.value)
         except Exception as e:
             print(f"【Server】 Send heartbeat error: {e}")
 
 
-async def send_dg_message(websocket: Optional[WebSocket], type: str, client_id: str, target_id: str, message: str):
+async def send_dg_message(websocket: Optional[WebSocket], type: MessageType, client_id: str, target_id: str, message: str):
     if websocket is not None:
         json = utils.get_dg_message_json(type, client_id, target_id, message)
         uid = get_client_uid(websocket)

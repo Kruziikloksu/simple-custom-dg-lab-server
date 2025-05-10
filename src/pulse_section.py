@@ -101,7 +101,7 @@ class PulseSection:
             target_str_list.append(target_str)
         return target_str_list
 
-    def get_websocket_wave_str(self, to_hex: bool = True):
+    def get_pulse_value_str(self, to_hex: bool = True):
         target_str_list = self.get_pulse_str_list(to_hex)
         result = ','.join(target_str_list)
         result = rf"[{result}]"

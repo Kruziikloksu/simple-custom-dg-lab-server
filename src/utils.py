@@ -8,12 +8,65 @@ from typing import List, Optional
 from pulse_section import PulseSection
 from functools import lru_cache
 from pydantic import BaseModel
+from enums import MessageType, ChannelType, StrengthChangeMode
+
 
 class DungeonLabMessage(BaseModel):
-    type: str = ""
+    type: MessageType = MessageType.MSG
     clientId: str = ""
     targetId: str = ""
     message: str = ""
+
+
+class DungeonLabStrengthMessage(BaseModel):
+    channel: ChannelType = ChannelType.A
+    mode: StrengthChangeMode = StrengthChangeMode.FIXED
+    value: int = 0
+
+
+class DungeonLabClearMessage(BaseModel):
+    channel: ChannelType = ChannelType.A
+
+
+class DungeonLabPulseMessage(BaseModel):
+    channel: ChannelType = ChannelType.A
+    pulse: str = ""
+
+
+class DungeonLabPresetPulseMessage(BaseModel):
+    channel: ChannelType = ChannelType.A
+    preset: str = ""
+
+
+class DungeonLabSimpleMessage(BaseModel):
+    type: MessageType = MessageType.MSG
+    message: str = ""
+
+
+def get_strength_str(channel: ChannelType, mode: StrengthChangeMode, value: int) -> str:
+    return f"strength-{channel.value}+{mode.value}+{value}"
+
+
+def get_clear_str(channel: ChannelType) -> str:
+    return f"clear-{channel.value}"
+
+
+def get_pulse_str(channel: ChannelType, pulse: str) -> str:
+    return f"pulse-{channel.name}:{pulse}"
+
+
+def get_preset_pulse_str(channel: ChannelType, preset: str) -> str:
+    return f"preset-{channel.value}:{preset}"
+
+
+def get_preset_pulse_section_str_list(preset: str) -> List[str]:
+    result = []
+    section_list = simple_decode_dg_pulse_str(preset)
+    for section in section_list:
+        section_str = section.get_pulse_value_str()
+        result.append(section_str)
+    return result
+
 
 preset_wave_data_dict = {
     "呼吸": r'Dungeonlab+pulse:35,1,8=0,20,0,1,1/0.00-1,20.00-0,40.00-0,60.00-0,80.00-0,100.00-1,100.00-1,100.00-1',
@@ -46,7 +99,7 @@ def get_preset_wave_data(id: str) -> Optional[str]:
         return None
 
 
-def get_dg_message_json(type: str, client_id: str, target_id: str, message: str) -> str:
+def get_dg_message_json(type: MessageType, client_id: str, target_id: str, message: str) -> str:
     data = DungeonLabMessage(
         type=type,
         clientId=client_id,
@@ -76,10 +129,6 @@ def get_qr_code_str(host, port, client_id) -> str:
 # B 通道强度-20 -> strength-2+0+20
 # A 通道强度指定为 35 -> strength-1+2+35
 # Tips 指令必须严格按照协议编辑，任何非法的指令都会在 APP 端丢弃，不会执行
-
-
-def get_strength_str(channel: str, mode: str, value: str) -> str:
-    return f"strength-{channel}+{mode}+{value}"
 
 
 def clamp(n, min, max):
@@ -182,8 +231,8 @@ def simple_decode_dg_pulse_str(dg_pulse_str: str) -> List[PulseSection]:
             int(section_time_step))  # 小节时长 单位秒 使用值注意要除波形时长向上取整乘以波形时长
         frequency_gradient_type = int(section_config_list[3])  # 频率渐变类型
         is_active = int(section_config_list[4])  # 小节是否启用
-        pulse_section = PulseSection(from_frequency, to_frequency, section_time,
-                                     frequency_gradient_type, is_active, speed, rest_time if is_last_section else 0)
+        pulse_section = PulseSection(from_frequency, to_frequency, section_time, frequency_gradient_type,
+                                     is_active, speed, rest_time if is_last_section else 0)
         pulse_data_str = section_str.split("/")[1]
         pulse_data_list = pulse_data_str.split(",")
         for pulse_data in pulse_data_list:

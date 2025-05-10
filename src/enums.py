@@ -34,6 +34,7 @@ class MessageType(Enum):
     MSG = "msg"
     BREAK = "break"
     ERROR = "error"
+    CUSTOM = "custom"
 
 
 class PulseFrequencyGradientType(Enum):

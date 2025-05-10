@@ -65,7 +65,6 @@ async def on_receive_message(response: str):
             if message == "targetId":
                 client_id = data.clientId
                 custom_logger.info(f"【Client】 Bind clientId: {client_id}")
-                # show_qr_code()
             elif message == "DGLAB" and data.clientId == client_id:
                 target_id = data.targetId
                 custom_logger.info(f"【Client】 Bind targetId: {target_id}")
@@ -87,39 +86,35 @@ async def on_receive_message(response: str):
         custom_logger.error(f"【Client】 Error processing message: {e}")
 
 
-async def send_all_preset_wave_data(channel: ChannelType):
+async def send_all_preset_pulse_message(channel: ChannelType):
     preset_dict = utils.get_preset_wave_data_dict()
-    for preset_key in preset_dict.keys():
-        await send_preset_wave_data(channel, preset_key)
+    for preset in preset_dict.values():
+        await send_preset_pulse_message(channel, preset)
 
 
-async def send_preset_wave_data(channel: ChannelType, preset_key: str):
-    preset_wave_data = utils.get_preset_wave_data(preset_key)
-    if preset_wave_data:
-        section_list = utils.simple_decode_dg_pulse_str(preset_wave_data)
-        for section in section_list:
-            wave_str = section.get_websocket_wave_str()
-            await send_pulse_dg_message(channel, wave_str)
+async def send_preset_pulse_message(channel: ChannelType, preset: str):
+    preset = utils.get_preset_pulse_str(channel, preset)
+    await send_dg_message(MessageType.MSG, preset)
 
 
-async def send_pulse_dg_message(channel: ChannelType, wave_str: str):
-    pulse_str = f"pulse-{channel.name}:{wave_str}"
-    await send_dg_message(MessageType.MSG, pulse_str)
+async def send_pulse_dg_message(channel: ChannelType, pulse: str):
+    pulse = utils.get_pulse_str(channel, pulse)
+    await send_dg_message(MessageType.MSG, pulse)
 
 
 async def send_clear_pulse_dg_message(channel: ChannelType):
-    await send_dg_message(MessageType.MSG, f"clear-{channel.value}")
+    await send_dg_message(MessageType.MSG, utils.get_clear_str(channel))
 
 
-async def send_strength_dg_message(channel: ChannelType, mode: StrengthChangeMode, value: str):
-    await send_dg_message(MessageType.MSG, f"strength-{channel.value}+{mode.value}+{value}")
+async def send_strength_dg_message(channel: ChannelType, mode: StrengthChangeMode, value: int):
+    await send_dg_message(MessageType.MSG, utils.get_strength_str(channel, mode, value))
 
 
 async def send_dg_message(type: MessageType, message: str):
     custom_logger.debug(f"【Client】 Received message: {message}")
     global websocket, client_id, target_id
     if websocket:
-        json_str = utils.get_dg_message_json(type.value, client_id, target_id, message)
+        json_str = utils.get_dg_message_json(type, client_id, target_id, message)
         custom_logger.debug(f"【Client】 Send message: {json_str}")
         await websocket.send(json_str)
 
