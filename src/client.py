@@ -61,14 +61,14 @@ async def on_receive_message(response: str):
         data = DungeonLabMessage.model_validate_json(json_data=response)
         type = data.type
         message = data.message
-        if type == "bind":
+        if type == MessageType.BIND:
             if message == "targetId":
                 client_id = data.clientId
                 custom_logger.info(f"【Client】 Bind clientId: {client_id}")
             elif message == "DGLAB" and data.clientId == client_id:
                 target_id = data.targetId
                 custom_logger.info(f"【Client】 Bind targetId: {target_id}")
-        elif type == "msg":
+        elif type == MessageType.MSG:
             if message.startswith("strength"):
                 global strength_a, strength_b, strength_limit_a, strength_limit_b
                 strength_arr = message.split("-")
