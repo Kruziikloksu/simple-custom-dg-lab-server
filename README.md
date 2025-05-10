@@ -1,18 +1,12 @@
-# simple-custom-dg-lab-server
-
-## 简易的DG-LAB消息转发服务
-
----
+# simple-custom-dg-lab-server `<br>`简易的DG-LAB消息转发服务
 
 ## 简述
 
 一个基于[FastAPI](https://fastapi.tiangolo.com/)和[Uvicorn](https://www.uvicorn.org/)构建的简易的[DG-LAB](https://github.com/DG-LAB-OPENSOURCE/DG-LAB-OPENSOURCE)消息转发服务。
 
-主要为方便个人制作游戏Mod娱乐自用，尽可能简易~~（简陋）~~，预期仅支持Windows系统下使用，内含简单的Unity客户端脚本示例。
+主要为方便个人制作游戏Mod娱乐自用，尽可能简易~~简陋~~，预期仅支持Windows系统下使用，内含简单的Unity客户端脚本示例。
 
 内置一个临时客户端通过WebSocket绑定DG-LAB APP，支持通过Http Post通知APP。同时支持第三方客户端连接WebSocket并与APP绑定进行通信。此处仅设计支持每组设备一一绑定，如有额外需求可自行编写代码实现。
-
----
 
 ## 功能支持
 
@@ -21,8 +15,6 @@
 - [X] 通道强度修改
 - [X] Http Post请求控制APP
 - [X] WebSocket连接控制APP
-
----
 
 ## 快速上手
 
@@ -40,7 +32,7 @@
 
 默认所有非DG-LAB APP （下称APP）的客户端连接时自动弹出二维码图片用于APP绑定，扫码时请保证启动APP的手机与本机处于统一网络环境下。此二维码图片如有需要请自行留存，客户端断开连接后即失效。
 
-下方介绍使用Http Post请求和WebSocket连接两种方式控制APP，请按需实现自己的客户端。WebSocket客户端实现逻辑可参考本仓库的 `src/client.py`。此处也提供在Unity实现的两种客户端示例，可在Release下载.unitypackage文件导入工程或查阅本仓库的example目录。如果你使用[BepInEx](https://github.com/BepInEx/BepInEx)编写插件，可以参考 `example\DungeonLabExample\Network\Http\DungeonLabHttpManager.cs`的实现逻辑~~（或者不嫌代码丑也可以直接拿去用）~~。
+下方介绍使用Http Post请求和WebSocket连接两种方式控制APP，请按需实现自己的客户端。WebSocket客户端实现逻辑可参考本仓库的 `src/client.py`。此处也提供在Unity实现的两种客户端示例，可在Release下载.unitypackage文件导入工程或查阅本仓库的example目录。如果你使用[BepInEx](https://github.com/BepInEx/BepInEx)编写插件，可以参考 `example\DungeonLabExample\Network\Http\DungeonLabHttpManager.cs`的实现逻辑~~或者不嫌代码丑也可以直接拿去用~~。
 
 ### Http Post 请求
 
@@ -140,13 +132,9 @@
 | :--- | :------------------------------------------------------- | :------------------- | :---------- |
 | msg  | strength-通道A强度+通道B强度+通道A强度上限+通道B强度上限 | 自定义客户端的唯一ID | APP的唯一ID |
 
----
-
-
-
 ## APP导出波形数据解析
 
-DG-APP推出了波形文件导出的功能，因此我们可以比较方便地利用它在APP编辑好预设的波形小节然后导出使用。但是找了半天不知道为什么完全没找到有人做这个文件内容的解析，于是只好自己对着字符串硬测~~（硬电）~~了一晚上。
+DG-APP推出了波形文件导出的功能，因此我们可以比较方便地利用它在APP编辑好预设的波形小节然后导出使用。但是找了半天不知道为什么完全没找到有人做这个文件内容的解析，于是只好自己对着字符串硬~~电~~测了一晚上。
 
 获取波形数据的方式：APP内长按波形，下载.pulse文件至本地，然后随便使用一个文本编辑器打开即可获得。
 
@@ -185,4 +173,4 @@ DG-APP推出了波形文件导出的功能，因此我们可以比较方便地�
 
 **以上的所有值，注意是滑条值的部分，它们不是真实数据，而是APP内滑动条的值，而这些条在不同区间的步长是不一样的，需要自行对照换算才能得到实际值。**
 
-很明显，有了这些信息，我们可以使用这份字符串构建APP收信协议的脉冲数据，插入脉冲数据的数量可以根据小节时长、播放速率、休息时长（这个有点问题，APP的显示也疑似有Bug，可以忽略不计）算出，频率则可以根据频率的起始值和终点值按照渐变类型插值算出。这样就可以基本模拟出APP导出波形的效果了。此处可参考 `src/utils.py`和 `src/pulse_section.py`，里面是我快速处理的简易解析和转换代码~~（超长临时代码）~~。
+很明显，有了这些信息，我们可以使用这份字符串构建APP收信协议的脉冲数据，插入脉冲数据的数量可以根据小节时长、播放速率、休息时长（这个有点问题，APP的显示也疑似有Bug，可以忽略不计）算出，频率则可以根据频率的起始值和终点值按照渐变类型插值算出。这样就可以基本模拟出APP导出波形的效果了。此处可参考 `src/utils.py`和 `src/pulse_section.py`，里面是我快速处理的简易解析和转换~~超长临时~~代码。
