@@ -7,7 +7,7 @@ import enums
 import custom_logger
 import uuid
 import json
-from utils import DungeonLabMessage, DungeonLabSimpleMessage, DungeonLabStrengthMessage, DungeonLabClearMessage, DungeonLabPulseMessage, DungeonLabPresetPulseMessage
+from models import DungeonLabMessage, DungeonLabSimpleMessage, DungeonLabStrengthMessage, DungeonLabClearMessage, DungeonLabPulseMessage, DungeonLabPresetPulseMessage
 from enums import MessageType, ChannelType
 from uvicorn import Config, Server
 from typing import Optional

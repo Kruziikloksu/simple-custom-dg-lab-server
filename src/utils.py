@@ -3,42 +3,9 @@ import qrcode
 from qrcode.image.pil import PilImage
 from typing import List, Optional
 from pulse_section import PulseSection
-from functools import lru_cache
-from pydantic import BaseModel
 from enums import MessageType, ChannelType, StrengthChangeMode
-
-
-class DungeonLabMessage(BaseModel):
-    type: MessageType = MessageType.MSG
-    clientId: str = ""
-    targetId: str = ""
-    message: str = ""
-
-
-class DungeonLabStrengthMessage(BaseModel):
-    channel: ChannelType = ChannelType.A
-    mode: StrengthChangeMode = StrengthChangeMode.FIXED
-    value: int = 0
-
-
-class DungeonLabClearMessage(BaseModel):
-    channel: ChannelType = ChannelType.A
-
-
-class DungeonLabPulseMessage(BaseModel):
-    channel: ChannelType = ChannelType.A
-    pulse: str = ""
-
-
-class DungeonLabPresetPulseMessage(BaseModel):
-    channel: ChannelType = ChannelType.A
-    preset: str = ""
-
-
-class DungeonLabSimpleMessage(BaseModel):
-    type: MessageType = MessageType.MSG
-    message: str = ""
-
+from functools import lru_cache
+from models import DungeonLabMessage
 
 def get_strength_str(channel: ChannelType, mode: StrengthChangeMode, value: int) -> str:
     return f"strength-{channel.value}+{mode.value}+{value}"
