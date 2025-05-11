@@ -29,7 +29,9 @@
 
 ## 📕快速上手
 
-1、此处下载[最新版本Release](https://github.com/Kruziikloksu/simple-custom-dg-lab-server/releases/latest) ，或拉取本项目工程。如选择自行部署此处默认用户有简单的Python基础。
+1、请务必先看看[DG-LAB-OPENSOURCE](https://github.com/DG-LAB-OPENSOURCE/DG-LAB-OPENSOURCE)官方的[文档说明](https://github.com/DG-LAB-OPENSOURCE/DG-LAB-OPENSOURCE/blob/main/socket/README.md)和[WebSocket控制实现](https://github.com/DG-LAB-OPENSOURCE/DG-LAB-OPENSOURCE/blob/main/socket/ws%E6%9C%8D%E5%8A%A1%E6%A0%B8%E5%BF%83%E6%96%B9%E6%B3%95%E8%AE%B2%E8%A7%A3-JavaScript.md)，对理解下文很有帮助！
+
+2、此处下载[最新版本Release](https://github.com/Kruziikloksu/simple-custom-dg-lab-server/releases/latest) ，或拉取本项目工程。如选择自行部署此处默认用户有简单的Python基础。
 
 部署流程：
 
@@ -37,7 +39,7 @@
 2. 确保已安装Python，版本需求Python >= 3.11
 3. 创建虚拟环境， 执行 `pip install -r requirements.txt` 安装依赖
 
-2、解压后运行simple-custom-dg-lab-server.exe或simple-custom-dg-lab-server，如果是自行部署则使用你的Python解释器运行[src/main.py](https://github.com/Kruziikloksu/simple-custom-dg-lab-server/blob/main/src/main.py)。此时将在可执行文件同级目录或工程 src 目录下生成配置文件 [config.toml](https://github.com/Kruziikloksu/simple-custom-dg-lab-server/blob/main/src/config.toml)，内为杂项配置，一般不需要修改。
+3、解压后运行simple-custom-dg-lab-server.exe或simple-custom-dg-lab-server，如果是自行部署则使用你的Python解释器运行[src/main.py](https://github.com/Kruziikloksu/simple-custom-dg-lab-server/blob/main/src/main.py)。此时将在可执行文件同级目录或工程 src 目录下生成配置文件 [config.toml](https://github.com/Kruziikloksu/simple-custom-dg-lab-server/blob/main/src/config.toml)，内为杂项配置，一般不需要修改。
 
 **如未修改过配置文件，将默认在本地 `0.0.0.0:4503`启动用作消息转发的服务，同时运行内置客户端进程连接 WebSocket 并弹出二维码图片。如此处希望不希望启动内置客户端进程，可在配置文件修改 `RUN_TEMP_CLIENT`值为 false后重新运行。**
 
@@ -188,6 +190,6 @@ DG-APP推出了波形文件导出的功能，因此我们可以比较方便地�
 
 ## 结语
 
-嗷呜！
-
 > 玩的开心！
+
+嗷呜！
