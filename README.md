@@ -2,7 +2,7 @@
 
 > ## 简易的DG-LAB消息转发服务
 
-> ⚠️ 使用声明
+> ### **⚠️ 使用声明**
 >
 > 本工具仅供学习娱乐与合法用途使用。
 >
@@ -29,7 +29,7 @@
 
 ## 📕快速上手
 
-1、此处下载 [最新版本Release](https://github.com/Kruziikloksu/simple-custom-dg-lab-server/releases/latest) ，或拉取本项目工程。如选择自行部署此处默认用户有简单的Python基础。
+1、此处下载[最新版本Release](https://github.com/Kruziikloksu/simple-custom-dg-lab-server/releases/latest) ，或拉取本项目工程。如选择自行部署此处默认用户有简单的Python基础。
 
 部署流程：
 
@@ -37,13 +37,13 @@
 2. 确保已安装Python，版本需求Python >= 3.11
 3. 创建虚拟环境， 执行 `pip install -r requirements.txt` 安装依赖
 
-2、解压后运行simple-custom-dg-lab-server.exe或simple-custom-dg-lab-server，如果是自行部署则使用你的Python解释器运行 `src/main.py`。此时将在可执行文件同级目录或工程 src 目录下生成配置文件 `config.toml`，内为杂项配置，一般不需要修改。
+2、解压后运行simple-custom-dg-lab-server.exe或simple-custom-dg-lab-server，如果是自行部署则使用你的Python解释器运行[src/main.py](https://github.com/Kruziikloksu/simple-custom-dg-lab-server/blob/main/src/main.py)。此时将在可执行文件同级目录或工程 src 目录下生成配置文件 [config.toml](https://github.com/Kruziikloksu/simple-custom-dg-lab-server/blob/main/src/config.toml)，内为杂项配置，一般不需要修改。
 
-**如未修改过 `config.toml`，将默认在本地 `0.0.0.0:4503`启动用作消息转发的服务，同时运行内置客户端进程连接 WebSocket 并弹出二维码图片。如此处希望不希望启动内置客户端进程，可在 `config.toml`修改 `RUN_TEMP_CLIENT`值为 false后重新运行。**
+**如未修改过配置文件，将默认在本地 `0.0.0.0:4503`启动用作消息转发的服务，同时运行内置客户端进程连接 WebSocket 并弹出二维码图片。如此处希望不希望启动内置客户端进程，可在配置文件修改 `RUN_TEMP_CLIENT`值为 false后重新运行。**
 
 **默认所有非DG-LAB APP （下称APP）的客户端连接时自动弹出二维码图片并在终端输出用于APP绑定，扫码时请保证启动APP的手机与本机处于统一网络环境下。此二维码如有需要请自行留存或在客户端自行生成，规则见[官方文档](https://github.com/DG-LAB-OPENSOURCE/DG-LAB-OPENSOURCE/blob/main/socket/README.md)，客户端断开连接后即失效。**
 
-下方介绍使用Http Post请求和WebSocket连接两种方式控制APP，请按需实现自己的客户端。WebSocket客户端实现逻辑可参考本仓库的 `src/client.py`。此处也提供在Unity实现的两种客户端示例，可在Release下载.unitypackage文件导入工程或查阅本仓库的example目录。如果你使用[BepInEx](https://github.com/BepInEx/BepInEx)等框架编写插件，可以参考 `example\DungeonLabExample\Network\Http\DungeonLabHttpManager.cs`的实现逻辑~~或者不嫌代码丑也可以复制去用~~。具体的波形发送规则，如一定时间内按间隔持续发送指定波形、随机波形等，就由用户在自己的客户端自行按需定制了~~比如敌方每动一下就发一次波形的沉浸式体验什么的~~。
+下方介绍使用Http Post请求和WebSocket连接两种方式控制APP，请按需实现自己的客户端。WebSocket客户端实现逻辑可参考本仓库的[src/client.py](https://github.com/Kruziikloksu/simple-custom-dg-lab-server/blob/main/src/client.py)。此处也提供在Unity实现的两种客户端示例，可在Release下载.unitypackage文件导入工程或查阅本仓库的[example](https://github.com/Kruziikloksu/simple-custom-dg-lab-server/tree/main/example)目录。如果你使用[BepInEx](https://github.com/BepInEx/BepInEx)等框架编写插件，可以参考 [example\DungeonLabExample\Network\Http\DungeonLabHttpManager.cs](https://github.com/Kruziikloksu/simple-custom-dg-lab-server/blob/main/example/DungeonLabExample/Network/Http/DungeonLabHttpManager.cs)的实现逻辑~~或者不嫌代码丑也可以复制去用~~。具体的波形发送规则，如一定时间内按间隔持续发送指定波形、随机波形等，就由用户在自己的客户端自行按需定制了~~比如敌方每动一下就发一次波形的沉浸式体验什么的~~。
 
 ### Http Post 请求
 
@@ -100,7 +100,7 @@
 
 如希望使用自定义的WebSocket客户端（下称自定义客户端）与APP进行绑定，可在启动服务后连接 `ws://服务所在IP:端口`，服务所在IP一般取本机局域网IP，可调所使用的网络库或其他方式自行获取。连接后将往客户端发送和APP绑定唯一ID消息结构一致的绑定消息Json，请保存自身的唯一ID。此时二维码将自动弹出，扫码后 APP 将绑定自身唯一ID及自定义客户端唯一ID，同时发送包含clientId和targetId的绑定消息。
 
-**连接期间，每隔默认30秒（可在 `config.toml`配置）向所有客户端发送一次同APP心跳消息结构的心跳消息，绑定的双方客户端任一方断开连接将向另一方发送同APP断开连接消息结构的断连消息。****注意：任一客户端发送的所有非"custom"类型的消息将直接转发给互相绑定的另一方客户端，即自定义客户端发送的消息将转发给APP，APP发送的消息将转发给自定义客户端，**双方均使用[DG-LAB-OPENSOURCE](https://github.com/DG-LAB-OPENSOURCE/DG-LAB-OPENSOURCE/blob/main/socket/README.md)提供的APP收信协议结构（因此也能够获取到APP返回的当前通道强度信息，请自行解析描述通道强度的字符串）**，Json结构如下：**
+**连接期间，每隔默认30秒（可在配置文件修改）向所有客户端发送一次同APP心跳消息结构的心跳消息，绑定的双方客户端任一方断开连接将向另一方发送同APP断开连接消息结构的断连消息。****注意：任一客户端发送的所有非"custom"类型的消息将直接转发给互相绑定的另一方客户端，即自定义客户端发送的消息将转发给APP，APP发送的消息将转发给自定义客户端，**双方均使用[DG-LAB-OPENSOURCE](https://github.com/DG-LAB-OPENSOURCE/DG-LAB-OPENSOURCE/blob/main/socket/README.md)提供的APP收信协议结构（因此也能够获取到APP返回的当前通道强度信息，请自行解析描述通道强度的字符串）**，Json结构如下：**
 
 | 参数名   | 类型   | 描述                                                        |
 | :------- | :----- | :---------------------------------------------------------- |
@@ -184,8 +184,10 @@ DG-APP推出了波形文件导出的功能，因此我们可以比较方便地�
 
 **以上的所有值，注意是滑条值的部分，它们不是真实数据，而是APP内滑动条的值，而这些条在不同区间的步长是不一样的，需要自行对照换算才能得到实际值。**
 
-很明显，有了这些信息，我们可以使用这份字符串构建APP收信协议的脉冲数据，插入脉冲数据的数量可以根据小节时长、播放速率、休息时长（这个有点问题，APP的显示也疑似有Bug，可以忽略不计）算出，频率则可以根据频率的起始值和终点值按照渐变类型插值算出。这样就可以基本模拟出APP导出波形的效果了。此处可参考 `src/utils.py`和 `src/pulse_section.py`，里面是我快速处理的简易解析和转换~~超长临时~~代码。
+很明显，有了这些信息，我们可以使用这份字符串构建APP收信协议的脉冲数据，插入脉冲数据的数量可以根据小节时长、播放速率、休息时长（这个有点问题，APP的显示也疑似有Bug，可以忽略不计）算出，频率则可以根据频率的起始值和终点值按照渐变类型插值算出。这样就可以基本模拟出APP导出波形的效果了。此处可参考[src/utils.py](https://github.com/Kruziikloksu/simple-custom-dg-lab-server/blob/main/src/utils.py)和[src/pulse_section.py](https://github.com/Kruziikloksu/simple-custom-dg-lab-server/blob/main/src/pulse_section.py)，里面是我快速处理的简易解析和转换~~超长临时~~代码。
 
 ## 结语
 
 嗷呜！
+
+> 玩的开心！
