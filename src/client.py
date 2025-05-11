@@ -24,6 +24,7 @@ strength_limit_b = 0
 def client_run():
     async def run():
         try:
+            await asyncio.sleep(1)
             uri = f"ws://{config.WS_CLIENT_HOST}:{config.WS_SERVER_PORT}"
             await websocket_client(uri)
         except Exception as e:

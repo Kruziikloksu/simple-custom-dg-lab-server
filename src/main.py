@@ -21,12 +21,11 @@ def start_process(target):
     return p
 
 
-async def main():
+def main():
     custom_logger.info("Starting...")
     try:
         start_process(run_server)
         if config.RUN_TEMP_CLIENT:
-            await asyncio.sleep(1)
             start_process(run_client)
         while True:
             pass
@@ -36,4 +35,4 @@ async def main():
 
 if __name__ == "__main__":
     multiprocessing.freeze_support()
-    asyncio.run(main())
+    main()

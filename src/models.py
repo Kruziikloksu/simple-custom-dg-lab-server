@@ -30,3 +30,10 @@ class DungeonLabPresetPulseMessage(BaseModel):
 class DungeonLabSimpleMessage(BaseModel):
     type: MessageType = MessageType.MSG
     message: str = ""
+
+
+class DungeonLabStrengthInfo(BaseModel):
+    strengthA: int = 0
+    strengthB: int = 0
+    strengthLimitA: int = 0
+    strengthLimitB: int = 0

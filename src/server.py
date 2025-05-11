@@ -7,7 +7,7 @@ import enums
 import custom_logger
 import uuid
 import json
-from models import DungeonLabMessage, DungeonLabSimpleMessage, DungeonLabStrengthMessage, DungeonLabClearMessage, DungeonLabPulseMessage, DungeonLabPresetPulseMessage
+from models import DungeonLabMessage, DungeonLabSimpleMessage, DungeonLabStrengthInfo, DungeonLabStrengthMessage, DungeonLabClearMessage, DungeonLabPulseMessage, DungeonLabPresetPulseMessage
 from enums import MessageType, ChannelType
 from uvicorn import Config, Server
 from typing import Optional
@@ -16,6 +16,11 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 # region Server
 app = FastAPI()
 server: Optional[Server] = None
+temp_client_id: Optional[str] = None
+strength_a = 0
+strength_b = 0
+strength_limit_a = 0
+strength_limit_b = 0
 
 
 def server_run():
@@ -58,9 +63,12 @@ def clear_client_dict():
 
 
 def add_client(websocket: WebSocket) -> str:
+    global temp_client_id
     if websocket not in client_dict.values():
         uid = str(uuid.uuid4())
         client_dict[uid] = websocket
+        if temp_client_id is None:
+            temp_client_id = uid
     return uid
 
 
@@ -137,6 +145,7 @@ async def on_client_disconnected(websocket):
 
 # region Handlers
 async def on_receive_message(websocket, response):
+    global strength_a, strength_b, strength_limit_a, strength_limit_b, temp_client_id
     try:
         uid = get_client_uid(websocket)
         try:
@@ -152,7 +161,17 @@ async def on_receive_message(websocket, response):
             if type == enums.MessageType.BIND:
                 await on_receive_bind_type_message(websocket, client_id, target_id, message)
             elif type == enums.MessageType.MSG:
-                pass
+                if temp_client_id:
+                    temp_target_id = get_target_id_by_client_id(temp_client_id)
+                    if temp_target_id and client_id == temp_client_id and uid == temp_target_id:
+                        if message.startswith("strength"):
+                            strength_arr = message.split("-")
+                            strength_str = strength_arr[1]
+                            strength_value_arr = strength_str.split("+")
+                            strength_a = int(strength_value_arr[0])
+                            strength_b = int(strength_value_arr[1])
+                            strength_limit_a = int(strength_value_arr[2])
+                            strength_limit_b = int(strength_value_arr[3])
             elif type == enums.MessageType.HEARTBEAT:
                 pass
             elif type == enums.MessageType.BREAK:
@@ -206,25 +225,25 @@ async def on_receive_custom_message(websocket, client_id: str, target_id: str, m
 
 @app.post("/dungeon_lab_message")
 async def on_post_dungeon_lab_message(dungeon_lab_message: DungeonLabSimpleMessage):
-    await send_dg_message_to_all_target(dungeon_lab_message.type, dungeon_lab_message.message)
+    await send_dg_message_to_temp_target(dungeon_lab_message.type, dungeon_lab_message.message)
 
 
 @app.post("/dungeon_lab_strength_message")
 async def on_post_dungeon_lab_strength_message(pulse_message: DungeonLabStrengthMessage):
     strength_str = utils.get_strength_str(pulse_message.channel, pulse_message.mode, pulse_message.value)
-    await send_dg_message_to_all_target(MessageType.MSG, strength_str)
+    await send_dg_message_to_temp_target(MessageType.MSG, strength_str)
 
 
 @app.post("/dungeon_lab_clear_message")
 async def on_post_dungeon_lab_clear_message(pulse_message: DungeonLabClearMessage):
     clear_str = utils.get_clear_str(pulse_message.channel)
-    await send_dg_message_to_all_target(MessageType.MSG, clear_str)
+    await send_dg_message_to_temp_target(MessageType.MSG, clear_str)
 
 
 @app.post("/dungeon_lab_pulse_message")
 async def on_post_dungeon_lab_pulse_message(pulse_message: DungeonLabPulseMessage):
     pulse_str = utils.get_pulse_str(pulse_message.channel, pulse_message.pulse)
-    await send_dg_message_to_all_target(MessageType.MSG, pulse_str)
+    await send_dg_message_to_temp_target(MessageType.MSG, pulse_str)
 
 
 @app.post("/dungeon_lab_preset_pulse_message")
@@ -232,19 +251,34 @@ async def on_post_dungeon_lab_preset_pulse_message(pulse_message: DungeonLabPres
     section_pulse_list = utils.get_preset_pulse_section_str_list(pulse_message.preset)
     for section_pulse in section_pulse_list:
         pulse_str = utils.get_pulse_str(pulse_message.channel, section_pulse)
-        await send_dg_message_to_all_target(MessageType.MSG, pulse_str)
+        await send_dg_message_to_temp_target(MessageType.MSG, pulse_str)
+
+
+@app.get("/dungeon_lab_temp_strength_info")
+async def on_get_dungeon_lab_temp_strength_info():
+    global strength_a, strength_b, strength_limit_a, strength_limit_b
+    info = DungeonLabStrengthInfo(
+        strengthA=strength_a,
+        strengthB=strength_b,
+        strengthLimitA=strength_limit_a,
+        strengthLimitB=strength_limit_b
+    )
+    return info
 # endregion
 
 
 # region Send
-async def send_dg_message_to_all_target(type: MessageType, message: str):
+async def send_dg_message_to_temp_target(type: MessageType, message: str):
+    global temp_client_id
     try:
-        custom_logger.debug(f"【Server】 Broadcast message to DG-LAB: {{type:{type.value},message:{message},...}}")
-        for client_id, target_id in relationship_dict.items():
-            ws = get_client_websocket(target_id)
-            await send_dg_message(ws, type, client_id, target_id, message)
+        custom_logger.debug(f"【Server】 Send message to temp DG-LAB: {{type:{type.value},message:{message},...}}")
+        if temp_client_id:
+            temp_target_id = get_target_id_by_client_id(temp_client_id)
+            if temp_target_id:
+                ws = get_client_websocket(temp_target_id)
+                await send_dg_message(ws, type, temp_client_id, temp_target_id, message)
     except Exception as e:
-        custom_logger.error(f"【Server】 Error broadcasting message to DG-LAB: {e}")
+        custom_logger.error(f"【Server】 Error sending message to temp DG-LAB: {e}")
 
 
 async def send_heartbeat(websocket: WebSocket):
