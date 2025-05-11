@@ -1,5 +1,15 @@
 # simple-custom-dg-lab-server
 
+> ## 简易的DG-LAB消息转发服务
+
+> ⚠️ 使用声明
+>
+> 本工具仅供学习与合法用途使用。
+>
+> 使用本工具即视为您同意自行承担一切使用后果。
+>
+> 作者不对因使用本工具而导致的任何滥用、损害或法律问题承担责任。
+
 ## 🐺简述
 
 一个基于[FastAPI](https://github.com/fastapi/fastapi)和[Uvicorn](https://github.com/encode/uvicorn)构建的简易[DG-LAB](https://github.com/DG-LAB-OPENSOURCE/DG-LAB-OPENSOURCE)消息转发服务。
