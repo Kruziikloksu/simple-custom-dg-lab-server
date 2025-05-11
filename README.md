@@ -16,7 +16,7 @@
 
 主要为方便个人游戏开发和制作Mod自用，尽可能简易~~简陋~~，暂预期仅支持Windows和Linux系统下使用，附简单的Unity客户端脚本示例。
 
-内置一个临时客户端通过WebSocket绑定DG-LAB APP，支持通过Http Post通知APP。同时支持第三方客户端连接WebSocket并与APP绑定进行通信。此处仅设计支持每组设备一一绑定，如有额外需求可自行编写代码实现。
+内置一个临时客户端通过WebSocket绑定DG-LAB APP，支持通过Http通知APP。同时支持第三方客户端连接WebSocket并与APP绑定进行通信。此处仅设计支持每组设备一一绑定，如有额外需求可自行编写代码实现。
 
 ## 💡功能支持
 
@@ -24,7 +24,7 @@
 - DG-LAB APP导出波形字符串发送（导出波形字符串解析）
 - 通道波形清空
 - 通道强度修改
-- Http Post请求控制DG-LAB APP
+- Http请求控制DG-LAB APP
 - WebSocket连接控制DG-LAB APP
 
 ## 📕快速上手
@@ -45,13 +45,13 @@
 
 **默认所有非DG-LAB APP （下称APP）的客户端连接时自动弹出二维码图片并在终端输出用于APP绑定，扫码时请保证启动APP的手机与本机处于统一网络环境下。此二维码如有需要请自行留存或在客户端自行生成，规则见[官方文档](https://github.com/DG-LAB-OPENSOURCE/DG-LAB-OPENSOURCE/blob/main/socket/README.md)，客户端断开连接后即失效。**
 
-下方介绍使用Http Post请求和WebSocket连接两种方式控制APP，请按需实现自己的客户端。WebSocket客户端实现逻辑可参考本仓库的[src/client.py](https://github.com/Kruziikloksu/simple-custom-dg-lab-server/blob/main/src/client.py)。此处也提供在Unity实现的两种客户端示例，可在Release下载.unitypackage文件导入工程或查阅本仓库的[example](https://github.com/Kruziikloksu/simple-custom-dg-lab-server/tree/main/example)目录。如果你使用[BepInEx](https://github.com/BepInEx/BepInEx)等框架编写插件，可以参考 [example\DungeonLabExample\Network\Http\DungeonLabHttpManager.cs](https://github.com/Kruziikloksu/simple-custom-dg-lab-server/blob/main/example/DungeonLabExample/Network/Http/DungeonLabHttpManager.cs)的实现逻辑~~或者不嫌代码丑也可以复制去用~~。具体的波形发送规则，如一定时间内按间隔持续发送指定波形、随机波形等，就由用户在自己的客户端自行按需定制了~~比如敌方每动一下就发一次波形的沉浸式体验什么的~~。
+下方介绍使用Http请求和WebSocket连接两种方式控制APP，请按需实现自己的客户端。WebSocket客户端实现逻辑可参考本仓库的[src/client.py](https://github.com/Kruziikloksu/simple-custom-dg-lab-server/blob/main/src/client.py)。此处也提供在Unity实现的两种客户端示例，可在Release下载.unitypackage文件导入工程或查阅本仓库的[example](https://github.com/Kruziikloksu/simple-custom-dg-lab-server/tree/main/example)目录。如果你使用[BepInEx](https://github.com/BepInEx/BepInEx)等框架编写插件，可以参考 [example\DungeonLabExample\Network\Http\DungeonLabHttpManager.cs](https://github.com/Kruziikloksu/simple-custom-dg-lab-server/blob/main/example/DungeonLabExample/Network/Http/DungeonLabHttpManager.cs)的实现逻辑~~或者不嫌代码丑也可以复制去用~~。具体的波形发送规则，如一定时间内按间隔持续发送指定波形、随机波形等，就由用户在自己的客户端自行按需定制了~~比如敌方每动一下就发一次波形的沉浸式体验什么的~~。
 
-### Http Post 请求
+### Http请求
 
-如扫描绑定内置客户端自动连接时生成的二维码，可使用Http Post向 `http://服务所在IP:端口/请求路径`发送Json请求控制APP，服务所在IP一般取本机局域网IP，可调所使用的网络库或其他方式自行获取。**~~收到请求后服务会向所有连接的 APP 广播对应消息。本服务不保存APP返回的通道强度数据，仅发送消息告知APP执行对应行为~~。收到请求后不再向所有APP广播消息，改为仅向内置客户端绑定的APP发送。同时现在本服务会保存内置客户端绑定的APP的强度信息，新增Get请求路径 `/dungeon_lab_temp_strength_info`用于获取强度信息。**
+如扫描绑定内置客户端自动连接时生成的二维码，可使用Http向 `http://服务所在IP:端口/请求路径`发送Json请求控制APP，服务所在IP一般取本机局域网IP，可调所使用的网络库或其他方式自行获取。**~~收到请求后服务会向所有连接的 APP 广播对应消息。本服务不保存APP返回的通道强度数据，仅发送消息告知APP执行对应行为~~。收到请求后不再向所有APP广播消息，改为仅向内置客户端绑定的APP发送。同时现在本服务会保存内置客户端绑定的APP的强度信息，新增Get请求路径 `/dungeon_lab_temp_strength_info`用于获取强度信息。**
 
-此处支持以下几种Http Post请求路径，**以下所有的请求都会在服务内部设置了 "clientId" 和 "targetId" 后向所有已连接的APP广播消息**：
+此处支持以下几种Http请求路径，**以下所有的请求都会在服务内部设置了 "clientId" 和 "targetId" 后向所有已连接的APP广播消息**：
 
 1、 `/dungeon_lab_message`
 
