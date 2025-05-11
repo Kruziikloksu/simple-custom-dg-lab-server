@@ -1,4 +1,5 @@
-// using Sirenix.OdinInspector;
+using Sirenix.OdinInspector;
+using System;
 using System.Net.Http;
 using UnityEngine;
 namespace CustomDungeonLab
@@ -7,6 +8,10 @@ namespace CustomDungeonLab
     {
         public static DungeonLabHttpManager Instance { get; private set; }
         public int port = 4503;
+        public int strengthA = 0;
+        public int strengthB = 0;
+        public int strengthLimitA = 0;
+        public int strengthLimitB = 0;
 
         private void Awake()
         {
@@ -32,8 +37,38 @@ namespace CustomDungeonLab
                 string responseBody = await response.Content.ReadAsStringAsync();
             }
         }
+        public async void HttpGet(HttpPath path)
+        {
+            var host = DungeonLabUtility.GetLocalIPv4();
+            var uri = $"http://{host}:{port}/{path.ToString().ToLower()}";
+            using (HttpClient client = new HttpClient())
+            {
+                HttpResponseMessage response = await client.GetAsync(uri);
+                response.EnsureSuccessStatusCode();
+                string responseBody = await response.Content.ReadAsStringAsync();
+                try
+                {
+                    Debug.Log($"Http get response: {responseBody}");
+                    DungeonLabStrengthInfo strengthInfo = JsonUtility.FromJson<DungeonLabStrengthInfo>(responseBody);
+                    strengthA = strengthInfo.strengthA;
+                    strengthB = strengthInfo.strengthB;
+                    strengthLimitA = strengthInfo.strengthLimitA;
+                    strengthLimitB = strengthInfo.strengthLimitB;
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"Error parsing response: {e.Message}");
+                }
+            }
+        }
 
-        // [Button("SendAllDungeonLabPresetPulseMessage")]
+        [Button("HttpGetStrengthInfo")]
+        public void HttpGetStrengthInfo()
+        {
+            HttpGet(HttpPath.DUNGEON_LAB_TEMP_STRENGTH_INFO);
+        }
+
+        [Button("SendAllDungeonLabPresetPulseMessage")]
         public void SendAllDungeonLabPresetPulseMessage(DungeonLabChannel channel)
         {
             var presetWaveDataDict = DungeonLabUtility.PresetPulseDataDict;
@@ -43,7 +78,7 @@ namespace CustomDungeonLab
             }
         }
 
-        // [Button("SendDungeonLabPresetPulseMessage")]
+        [Button("SendDungeonLabPresetPulseMessage")]
         public void SendDungeonLabPresetPulseMessage(DungeonLabChannel channel, string presetKey)
         {
             var preset = DungeonLabUtility.GetPresetWaveData(presetKey);
@@ -56,7 +91,7 @@ namespace CustomDungeonLab
             HttpPost(message, HttpPath.DUNGEON_LAB_PRESET_PULSE_MESSAGE);
         }
 
-        // [Button("SendDungeonLabPulseMessage")]
+        [Button("SendDungeonLabPulseMessage")]
         public void SendDungeonLabPulseMessage(DungeonLabChannel channel, string pulseStr)
         {
             var messageData = new DungeonLabPulseMessage
@@ -68,7 +103,7 @@ namespace CustomDungeonLab
             HttpPost(message, HttpPath.DUNGEON_LAB_PULSE_MESSAGE);
         }
 
-        // [Button("SendDungeonLabClearMessage")]
+        [Button("SendDungeonLabClearMessage")]
         public void SendDungeonLabClearMessage(DungeonLabChannel channel)
         {
             var messageData = new DungeonLabClearMessage
@@ -79,7 +114,7 @@ namespace CustomDungeonLab
             HttpPost(message, HttpPath.DUNGEON_LAB_CLEAR_MESSAGE);
         }
 
-        // [Button("SendDungeonLabStrengthMessage")]
+        [Button("SendDungeonLabStrengthMessage")]
         public void SendDungeonLabStrengthMessage(DungeonLabChannel channel, DungeonLabStrengthChangeMode mode, int value)
         {
             var messageData = new DungeonLabStrengthMessage
@@ -92,7 +127,7 @@ namespace CustomDungeonLab
             HttpPost(message, HttpPath.DUNGEON_LAB_STRENGTH_MESSAGE);
         }
 
-        // [Button("SendDungeonLabMessage")]
+        [Button("SendDungeonLabMessage")]
         public void SendDungeonLabMessage(DungeonLabMessageType messageType, string message)
         {
             var messageData = new SimpleDungeonLabMessage
@@ -111,6 +146,7 @@ namespace CustomDungeonLab
         DUNGEON_LAB_CLEAR_MESSAGE = 2,
         DUNGEON_LAB_PULSE_MESSAGE = 3,
         DUNGEON_LAB_PRESET_PULSE_MESSAGE = 4,
+        DUNGEON_LAB_TEMP_STRENGTH_INFO = 5,
     }
 
     public struct SimpleDungeonLabMessage
@@ -141,5 +177,13 @@ namespace CustomDungeonLab
     {
         public DungeonLabChannel channel;
         public string preset;
+    }
+
+    public struct DungeonLabStrengthInfo
+    {
+        public int strengthA;
+        public int strengthB;
+        public int strengthLimitA;
+        public int strengthLimitB;
     }
 }
