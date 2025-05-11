@@ -2,7 +2,7 @@
 
 ## 🐺简述
 
-一个基于[FastAPI](https://github.com/fastapi/fastapi)和[Uvicorn](https://github.com/encode/uvicorn)构建的简易[DG-LAB](https://github.com/DG-LAB-OPENSOURCE/DG-LAB-OPENSOURCE)消息转发服务，支持郊狼V3。
+一个基于[FastAPI](https://github.com/fastapi/fastapi)和[Uvicorn](https://github.com/encode/uvicorn)构建的简易[DG-LAB](https://github.com/DG-LAB-OPENSOURCE/DG-LAB-OPENSOURCE)消息转发服务。
 
 主要为方便个人游戏开发和制作Mod自用，尽可能简易~~简陋~~，暂预期仅支持Windows和Linux系统下使用，附简单的Unity客户端脚本示例。
 
