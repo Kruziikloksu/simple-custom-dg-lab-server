@@ -277,33 +277,50 @@ async def on_receive_custom_message(websocket, client_id: str, target_id: str, m
 
 @app.post("/dungeon_lab_message")
 async def on_post_dungeon_lab_message(dungeon_lab_message: DungeonLabSimpleMessage):
-    await send_dg_message_to_temp_target(dungeon_lab_message.type, dungeon_lab_message.message)
+    sent = await send_dg_message_to_temp_target(dungeon_lab_message.type, dungeon_lab_message.message)
+    if not sent:
+        return Response(content="No bound DG-LAB APP", status_code=409)
+    return {"sent": True}
 
 
 @app.post("/dungeon_lab_strength_message")
 async def on_post_dungeon_lab_strength_message(pulse_message: DungeonLabStrengthMessage):
     strength_str = utils.get_strength_str(pulse_message.channel, pulse_message.mode, pulse_message.value)
-    await send_dg_message_to_temp_target(MessageType.MSG, strength_str)
+    sent = await send_dg_message_to_temp_target(MessageType.MSG, strength_str)
+    if not sent:
+        return Response(content="No bound DG-LAB APP", status_code=409)
+    return {"sent": True}
 
 
 @app.post("/dungeon_lab_clear_message")
 async def on_post_dungeon_lab_clear_message(pulse_message: DungeonLabClearMessage):
     clear_str = utils.get_clear_str(pulse_message.channel)
-    await send_dg_message_to_temp_target(MessageType.MSG, clear_str)
+    sent = await send_dg_message_to_temp_target(MessageType.MSG, clear_str)
+    if not sent:
+        return Response(content="No bound DG-LAB APP", status_code=409)
+    return {"sent": True}
 
 
 @app.post("/dungeon_lab_pulse_message")
 async def on_post_dungeon_lab_pulse_message(pulse_message: DungeonLabPulseMessage):
     pulse_str = utils.get_pulse_str(pulse_message.channel, pulse_message.pulse)
-    await send_dg_message_to_temp_target(MessageType.MSG, pulse_str)
+    sent = await send_dg_message_to_temp_target(MessageType.MSG, pulse_str)
+    if not sent:
+        return Response(content="No bound DG-LAB APP", status_code=409)
+    return {"sent": True}
 
 
 @app.post("/dungeon_lab_preset_pulse_message")
 async def on_post_dungeon_lab_preset_pulse_message(pulse_message: DungeonLabPresetPulseMessage):
     section_pulse_list = utils.get_preset_pulse_section_str_list(pulse_message.preset)
+    any_sent = False
     for section_pulse in section_pulse_list:
         pulse_str = utils.get_pulse_str(pulse_message.channel, section_pulse)
-        await send_dg_message_to_temp_target(MessageType.MSG, pulse_str)
+        sent = await send_dg_message_to_temp_target(MessageType.MSG, pulse_str)
+        any_sent = any_sent or sent
+    if not any_sent:
+        return Response(content="No bound DG-LAB APP", status_code=409)
+    return {"sent": True}
 
 
 @app.get("/dungeon_lab_temp_strength_info")
@@ -354,9 +371,13 @@ async def send_dg_message_to_temp_target(type: MessageType, message: str):
             temp_target_id = get_target_id_by_client_id(temp_client_id)
             if temp_target_id:
                 ws = get_client_websocket(temp_target_id)
-                await send_dg_message(ws, type, temp_client_id, temp_target_id, message)
+                if ws is not None:
+                    await send_dg_message(ws, type, temp_client_id, temp_target_id, message)
+                    return True
+        return False
     except Exception as e:
         custom_logger.error(f"【Server】 Error sending message to temp DG-LAB: {e}")
+        return False
 
 
 async def send_heartbeat(websocket: WebSocket):
