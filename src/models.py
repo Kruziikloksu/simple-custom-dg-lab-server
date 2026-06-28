@@ -37,3 +37,10 @@ class DungeonLabStrengthInfo(BaseModel):
     strengthB: int = 0
     strengthLimitA: int = 0
     strengthLimitB: int = 0
+
+
+class DungeonLabTempClientInfo(BaseModel):
+    clientId: str = ""
+    targetId: str = ""
+    bound: bool = False
+    qrCode: str = ""

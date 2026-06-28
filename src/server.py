@@ -6,12 +6,14 @@ import enums
 import custom_logger
 import uuid
 import json
-from models import DungeonLabMessage, DungeonLabSimpleMessage, DungeonLabStrengthInfo, DungeonLabStrengthMessage, DungeonLabClearMessage, DungeonLabPulseMessage, DungeonLabPresetPulseMessage
+import io
+from models import DungeonLabMessage, DungeonLabSimpleMessage, DungeonLabStrengthInfo, DungeonLabStrengthMessage, DungeonLabClearMessage, DungeonLabPulseMessage, DungeonLabPresetPulseMessage, DungeonLabTempClientInfo
 from enums import MessageType, ChannelType
 from pydantic import ValidationError
 from uvicorn import Config, Server
 from typing import Optional
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Response
+import qrcode
 
 # region Server
 app = FastAPI()
@@ -314,6 +316,32 @@ async def on_get_dungeon_lab_temp_strength_info():
         strengthLimitB=strength_limit_b
     )
     return info
+
+
+@app.get("/dungeon_lab_temp_client_info")
+async def on_get_dungeon_lab_temp_client_info():
+    client_id = temp_client_id or ""
+    target_id = get_target_id_by_client_id(client_id) if client_id else None
+    qr_code = utils.get_qr_code_str(config.WS_CLIENT_HOST, config.WS_SERVER_PORT, client_id) if client_id else ""
+    return DungeonLabTempClientInfo(
+        clientId=client_id,
+        targetId=target_id or "",
+        bound=bool(target_id),
+        qrCode=qr_code
+    )
+
+
+@app.get("/dungeon_lab_temp_client_qr.png")
+async def on_get_dungeon_lab_temp_client_qr_png():
+    client_id = temp_client_id or ""
+    if not client_id:
+        return Response(status_code=404)
+
+    qr_code = utils.get_qr_code_str(config.WS_CLIENT_HOST, config.WS_SERVER_PORT, client_id)
+    img = qrcode.make(qr_code)
+    buffer = io.BytesIO()
+    img.save(buffer, format="PNG")
+    return Response(content=buffer.getvalue(), media_type="image/png")
 # endregion
 
 
