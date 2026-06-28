@@ -7,6 +7,7 @@ namespace CustomDungeonLab
     public class DungeonLabHttpManager : MonoBehaviour
     {
         public static DungeonLabHttpManager Instance { get; private set; }
+        private static readonly HttpClient httpClient = new HttpClient();
         public int port = 4503;
         public int strengthA = 0;
         public int strengthB = 0;
@@ -29,21 +30,26 @@ namespace CustomDungeonLab
             Debug.Log($"Http post: {jsonStr}");
             var host = DungeonLabUtility.GetLocalIPv4();
             var uri = $"http://{host}:{port}/{path.ToString().ToLower()}";
-            using (HttpClient client = new HttpClient())
+            try
             {
                 HttpContent content = new StringContent(jsonStr, System.Text.Encoding.UTF8, "application/json");
-                HttpResponseMessage response = await client.PostAsync(uri, content);
+                HttpResponseMessage response = await httpClient.PostAsync(uri, content);
                 response.EnsureSuccessStatusCode();
                 string responseBody = await response.Content.ReadAsStringAsync();
             }
+            catch (Exception e)
+            {
+                Debug.LogError($"Http post error: {e.Message}");
+            }
         }
+
         public async void HttpGet(HttpPath path)
         {
             var host = DungeonLabUtility.GetLocalIPv4();
             var uri = $"http://{host}:{port}/{path.ToString().ToLower()}";
-            using (HttpClient client = new HttpClient())
+            try
             {
-                HttpResponseMessage response = await client.GetAsync(uri);
+                HttpResponseMessage response = await httpClient.GetAsync(uri);
                 response.EnsureSuccessStatusCode();
                 string responseBody = await response.Content.ReadAsStringAsync();
                 try
@@ -59,6 +65,10 @@ namespace CustomDungeonLab
                 {
                     Debug.LogError($"Error parsing response: {e.Message}");
                 }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Http get error: {e.Message}");
             }
         }
 

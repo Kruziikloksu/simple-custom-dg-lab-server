@@ -1,4 +1,3 @@
-import multiprocessing
 import config
 import utils
 import custom_logger
@@ -9,7 +8,7 @@ from utils import DungeonLabMessage
 from enums import MessageType, ChannelType, StrengthChangeMode
 
 
-disconnect_event = asyncio.Event()
+disconnect_event = None
 
 websocket = None
 
@@ -22,37 +21,51 @@ strength_limit_b = 0
 
 
 def client_run():
-    async def run():
-        try:
-            await asyncio.sleep(1)
-            uri = f"ws://{config.WS_CLIENT_HOST}:{config.WS_SERVER_PORT}"
-            await websocket_client(uri)
-        except Exception as e:
-            custom_logger.error(f"【Client】 WebSocket connection error: {e}")
-        finally:
-            if websocket:
-                await websocket.close()
-    asyncio.run(run())
+    uri = f"ws://{config.TEMP_CLIENT_HOST}:{config.WS_SERVER_PORT}"
+    asyncio.run(run_client(uri))
 
 
-def client_shutdown():
+async def run_client(uri: str):
     global disconnect_event
-    disconnect_event.set()
+    disconnect_event = asyncio.Event()
+    try:
+        await websocket_client(uri)
+    except Exception as e:
+        custom_logger.error(f"【Client】 WebSocket connection error: {e}")
+    finally:
+        if websocket:
+            await websocket.close()
+
+
+async def client_shutdown():
+    global disconnect_event
+    if disconnect_event is not None:
+        disconnect_event.set()
+    if websocket is not None:
+        await websocket.close()
 
 
 async def websocket_client(uri):
     global disconnect_event, websocket
+    if disconnect_event is None:
+        disconnect_event = asyncio.Event()
+
     try:
+        custom_logger.info(f"【Client】 Connecting to {uri}")
         async with websockets.connect(uri) as ws:
             websocket = ws
             while not disconnect_event.is_set():
-                response = await websocket.recv(True)
+                response = await websocket.recv()
                 await on_receive_message(response)
-            await websocket.close()
+            custom_logger.info("【Client】 Shutdown requested")
     except websockets.ConnectionClosed:
         custom_logger.info("【Client】 Connection closed")
+    except asyncio.CancelledError:
+        raise
     except Exception as e:
         custom_logger.error(f"【Client】 Error: {e}")
+    finally:
+        websocket = None
 
 
 async def on_receive_message(response: str):
@@ -112,7 +125,7 @@ async def send_strength_dg_message(channel: ChannelType, mode: StrengthChangeMod
 
 
 async def send_dg_message(type: MessageType, message: str):
-    custom_logger.debug(f"【Client】 Received message: {message}")
+    custom_logger.debug(f"【Client】 Send message payload: {message}")
     global websocket, client_id, target_id
     if websocket:
         json_str = utils.get_dg_message_json(type, client_id, target_id, message)
@@ -129,5 +142,4 @@ def show_qr_code():
 
 
 if __name__ == "__main__":
-    multiprocessing.freeze_support()
     client_run()

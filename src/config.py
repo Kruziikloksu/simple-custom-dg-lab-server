@@ -8,6 +8,7 @@ default_config = """
 [Misc]
 PORT = 4503
 RUN_TEMP_CLIENT = true
+TEMP_CLIENT_HOST = "127.0.0.1"
 HEARTBEAT_INTERVAL = 30
 LOG_TO_FILE = false
 """
@@ -52,6 +53,7 @@ toml_config = load_toml_config().get("Misc", {})
 RUN_TEMP_CLIENT = toml_config.get("RUN_TEMP_CLIENT", True)
 WS_SERVER_HOST = "0.0.0.0"
 WS_CLIENT_HOST = get_local_ip() #socket.gethostbyname(socket.gethostname())
+TEMP_CLIENT_HOST = toml_config.get("TEMP_CLIENT_HOST", "127.0.0.1")
 WS_SERVER_PORT = toml_config.get("PORT", 4503)
 HEARTBEAT_INTERVAL = toml_config.get("HEARTBEAT_INTERVAL", 30)
 LOG_LEVEL = logging.DEBUG

@@ -41,7 +41,7 @@
 
 3、解压后运行simple-custom-dg-lab-server.exe或simple-custom-dg-lab-server，如果是自行部署则使用你的Python解释器运行[src/main.py](https://github.com/Kruziikloksu/simple-custom-dg-lab-server/blob/main/src/main.py)。此时将在可执行文件同级目录或工程 src 目录下生成配置文件 [config.toml](https://github.com/Kruziikloksu/simple-custom-dg-lab-server/blob/main/src/config.toml)，内为杂项配置，一般不需要修改。
 
-**如未修改过配置文件，将默认在本地 `0.0.0.0:4503`启动用作消息转发的服务，同时运行内置客户端进程连接 WebSocket 并弹出二维码图片。如此处希望不希望启动内置客户端进程，可在配置文件修改 `RUN_TEMP_CLIENT`值为 false后重新运行。**
+**如未修改过配置文件，将默认在本地 `0.0.0.0:4503`启动用作消息转发的服务，同时在同一进程内运行内置客户端连接 WebSocket 并弹出二维码图片。如此处希望不希望启动内置客户端，可在配置文件修改 `RUN_TEMP_CLIENT`值为 false后重新运行。内置客户端连接本机服务默认使用 `TEMP_CLIENT_HOST = "127.0.0.1"`，二维码展示给 APP 的地址仍使用本机局域网 IP。**
 
 **默认所有非DG-LAB APP （下称APP）的客户端连接时自动弹出二维码图片并在终端输出用于APP绑定，扫码时请保证启动APP的手机与本机处于统一网络环境下。此二维码如有需要请自行留存或在客户端自行生成，规则见[官方文档](https://github.com/DG-LAB-OPENSOURCE/DG-LAB-OPENSOURCE/blob/main/socket/README.md)，客户端断开连接后即失效。**
 
